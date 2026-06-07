@@ -1,0 +1,17 @@
+global:
+  smtp_smarthost: "mailer:25"
+  smtp_from: "your-email@domain.com"
+  smtp_require_tls: false
+
+route:
+  receiver: email-alerts
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 5m
+
+receivers:
+  - name: email-alerts
+    email_configs:
+      - to: "alarm@domain.com"
+        send_resolved: true

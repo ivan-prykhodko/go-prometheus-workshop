@@ -1,0 +1,51 @@
+groups:
+  - name: my_app_recording_rules
+    interval: 1m
+    rules:
+      - record: "blog_post:request_duration_seconds:p50_5m"
+        expr: histogram_quantile(
+            0.50,
+            sum by (le) (
+              rate(my_app_ns_my_blog_post_http_request_duration_seconds_bucket{path="/blog/posts/:id"}[5m])
+            )
+          )
+
+      - record: "blog_post:request_duration_seconds:p95_5m"
+        expr: histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(my_app_ns_my_blog_post_http_request_duration_seconds_bucket{path="/blog/posts/:id"}[5m])
+            )
+          )
+
+      - record: "blog_post:request_duration_seconds:p99_5m"
+        expr: histogram_quantile(
+            0.99,
+            sum by (le) (
+              rate(my_app_ns_my_blog_post_http_request_duration_seconds_bucket{path="/blog/posts/:id"}[5m])
+            )
+          )
+
+      - record: "product:request_duration_seconds:p50_5m"
+        expr: histogram_quantile(
+            0.50,
+            sum by (le) (
+              rate(my_app_request_duration_seconds_bucket{url="/products/:id"}[15m])
+            )
+          )
+
+      - record: "product:request_duration_seconds:p95_5m"
+        expr: histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(my_app_request_duration_seconds_bucket{url="/products/:id"}[5m])
+            )
+          )
+
+      - record: "product:request_duration_seconds:p99_5m"
+        expr: histogram_quantile(
+            0.99,
+            sum by (le) (
+              rate(my_app_request_duration_seconds_bucket{url="/products/:id"}[5m])
+            )
+          )

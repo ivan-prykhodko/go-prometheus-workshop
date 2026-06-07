@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      target: app_dev
+    restart: unless-stopped
+    volumes:
+      - ./:/srv
+    ports:
+      - "8080:8080"
+    command: ["gow", "-c", "-v", "run", "cmd/product/httpserver/main.go"]
+    networks:
+      - default_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - default_network
+
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    networks:
+      - default_network
+
+  k6:
+    image: grafana/k6:latest
+    volumes:
+      - ./k6:/scripts
+    depends_on:
+      - app
+    environment:
+      BASE_URL: http://app:8080
+    networks:
+      - default_network
+    profiles:
+      - donotstart
+
+  mailer:
+    image: tophfr/mailcatcher:latest
+    ports:
+      - "8081:80"
+    networks:
+      - default_network
+
+networks:
+  default_network:

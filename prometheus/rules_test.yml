@@ -1,0 +1,22 @@
+rule_files:
+  - /etc/prometheus/recording_rules.yml
+  - /etc/prometheus/alerting_rules.yml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'my_app_requests_total{url="/products/:id",code="200"}'
+        values: '0 100 200 300 400 500 600 700 800 900 1000'
+      - series: 'my_app_requests_total{url="/products/:id",code="404"}'
+        values: '0 2 4 6 8 10 12 14 16 18 20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ProductHighErrorRate
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: "High error rate for /products/:id"
+              description: "More than 1% of requests return errors over the last 5 minutes."

@@ -1,0 +1,50 @@
+groups:
+  - name: my_app_alerts
+    rules:
+      # High latency alerts
+      - alert: BlogPostHighLatencyP95
+        expr: blog_post:request_duration_seconds:p95_5m > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency for /blog/posts/:id"
+          description: "p95 latency exceeded 200ms for more than 5 minutes."
+
+      - alert: ProductHighLatencyP95
+        expr: product:request_duration_seconds:p95_5m > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency for /products/:id"
+          description: "p95 latency exceeded 200ms for more than 5 minutes."
+
+      # High error rate alerts
+      - alert: BlogPostHighErrorRate
+        expr: |
+          (
+            sum(rate(blog_post_http_requests_total{path="/blog/posts/:id",status!="OK"}[5m]))
+            /
+            sum(rate(blog_post_http_requests_total{path="/blog/posts/:id"}[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate for /blog/posts/:id"
+          description: "More than 1% of requests return errors over the last 5 minutes."
+
+      - alert: ProductHighErrorRate
+        expr: |
+          (
+            sum(rate(my_app_requests_total{url="/products/:id", code=~"4..|5.."}[5m]))
+            /
+            sum(rate(my_app_requests_total{url="/products/:id"}[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate for /products/:id"
+          description: "More than 1% of requests return errors over the last 5 minutes."
